@@ -21,6 +21,9 @@ class Resampler(BaseEstimator, TransformerResamplerMixin):
     period : int, default: ``2``
         The sampling period, i.e. one point every period will be kept.
 
+    offset : int, default: ``0``
+        The index from which to start the resampling.
+
     Examples
     --------
     >>> import numpy as np
@@ -39,10 +42,12 @@ class Resampler(BaseEstimator, TransformerResamplerMixin):
     """
 
     _hyperparameters = {
-        'period': {'type': int, 'in': Interval(1, np.inf, closed='left')}}
+        'period': {'type': int, 'in': Interval(1, np.inf, closed='left')},
+        'offset': {'type': int, 'in': Interval(0, np.inf, closed='left')}}
 
-    def __init__(self, period=2):
+    def __init__(self, period=2, offset=0):
         self.period = period
+        self.offset = offset
 
     def fit(self, X, y=None):
         """Do nothing and return the estimator unchanged.
@@ -92,7 +97,7 @@ class Resampler(BaseEstimator, TransformerResamplerMixin):
 
         if Xt.ndim == 1:
             Xt = Xt[: None]
-        Xt = Xt[::self.period]
+        Xt = Xt[self.offset::self.period]
 
         return Xt
 
@@ -116,7 +121,7 @@ class Resampler(BaseEstimator, TransformerResamplerMixin):
         """
         check_is_fitted(self, '_is_fitted')
         yr = column_or_1d(y)
-        yr = yr[::self.period]
+        yr = yr[self.offset::self.period]
 
         return yr
 
